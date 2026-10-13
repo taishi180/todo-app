@@ -16,8 +16,11 @@
         <form action="{{ route('tasks.store') }}" method="post">
             @csrf
             <div class="form-row">
-                <input type="text" name="name" placeholder="洗濯物をたたむ...">
+                <input type="text" name="name" value="{{ old('name') }}" placeholder="洗濯物をたたむ...">
                 <button type="submit">追加する</button>
             </div>
+            @error('name')
+                <p class="error">{{ $message }}</p>
+            @enderror
         </form>
     </div>

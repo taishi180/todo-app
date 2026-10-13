@@ -34,8 +34,17 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-         Task::create([
-            'name'   => $request->input('name'),
+        $validated = $request->validate([
+            'name' => 'required|min:3|max:100|unique:tasks,name',
+        ], [
+            'name.required' => 'タスク名を入力してください。',
+            'name.min'      => 'タスク名は3文字以上で入力してください。',
+            'name.max'      => 'タスク名は100文字以内で入力してください。',
+            'name.unique'   => 'すでに同じ名前のタスクが存在します。',
+        ]);
+
+        Task::create([
+            'name'   => $validated['name'],
             'status' => false,
         ]);
 
