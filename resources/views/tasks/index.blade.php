@@ -14,6 +14,7 @@
             <tr>
                 <th>タスク</th>
                 <th>登録日時</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -21,6 +22,21 @@
                 <tr>
                     <td>{{ $task->name }}</td>
                     <td class="muted">{{ $task->created_at->format('Y/m/d H:i') }}</td>
+                    <td class="actions">
+                        <form action="{{ route('tasks.complete', $task->id) }}" method="post">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn-success btn-sm">完了</button>
+                        </form>
+
+                        <a href="{{ route('tasks.edit', $task->id) }}" class="btn btn-accent btn-sm">編集</a>
+
+                         <form action="{{ route('tasks.destroy', $task->id) }}" method="post" onsubmit="return confirm('「{{ addslashes($task->name) }}」を削除します。よろしいですか？')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn-danger btn-sm">削除</button>
+                        </form>
+                    </td>
                 </tr>
             @endforeach
         </tbody>
@@ -40,3 +56,5 @@
         </form>
     </div>
 @endsection
+
+

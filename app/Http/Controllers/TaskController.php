@@ -8,13 +8,29 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
+    private array $rules = [
+        'name' => 'required|max:100',
+    ];
+
+    private array $messages = [
+        'name.required' => 'タスク名を入力してください。',
+        'name.max'      => 'タスク名は100文字以内で入力してください。',
+    ];
 
     public function index()
     {
-    $tasks = Task::orderBy('created_at', 'desc')->get();
+    
+        $tasks = Task::where('status', false)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('tasks.index', compact('tasks'));
+        $doneTasks = Task::where('status', true)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('tasks.index', compact('tasks', 'doneTasks'));
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -48,7 +64,9 @@ class TaskController extends Controller
             'status' => false,
         ]);
 
-        return redirect()->route('tasks.index');
+        return redirect()
+        ->route('tasks.index')
+        ->with('message', 'タスクを追加しました。');
     }
 
     /**
@@ -70,7 +88,9 @@ class TaskController extends Controller
      */
     public function edit($id)
     {
-        //
+        $task = Task::findOrFail($id);
+
+        return view('tasks.edit', compact('task'));
     }
 
     /**
@@ -82,7 +102,20 @@ class TaskController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|max:100',
+        ], [
+            'name.required' => 'タスク名を入力してください。',
+            'name.max'      => 'タスク名は100文字以内で入力してください。',
+        ]);
+
+        $task = Task::findOrFail($id);
+        $task->name = $validated['name'];
+        $task->save();
+
+        return redirect()
+        ->route('tasks.index')
+        ->with('message', 'タスクを更新しました。');
     }
 
     /**
@@ -93,6 +126,40 @@ class TaskController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $task = Task::findOrFail($id);
+        $task->delete();
+
+        return redirect()
+        ->route('tasks.index')
+        ->with('message', 'タスクを削除しました。')
+        ->with('type', 'danger');
     }
+    public function complete($id)
+    {
+        $task = Task::find($id);
+        $task->status = true;
+        $task->save();
+
+        return redirect()
+        ->route('tasks.index')
+        ->with('message', 'タスクを完了にしました。')
+        ->with('type', 'success');
+    }
+
+    /**
+     * PATCH /tasks/{id}/undo  未完了に戻す
+     */
+    public function undo($id)
+    {
+        $task = Task::findOrFail($id);
+        $task->status = false; // status を false（未完了）に戻す
+        $task->save();
+
+        return redirect()->route('tasks.index')
+            ->with('message', 'タスクを未完了に戻しました。')
+            ->with('type', 'success');
+    }
+    
 }
+
+

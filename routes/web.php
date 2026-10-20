@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('tasks.index');
 });
 
 Route::get('/about', function () {
@@ -25,3 +25,19 @@ Route::resource('tasks', TaskController::class)
 
 Route::resource('tasks', TaskController::class)
     ->only(['index', 'store']);
+
+Route::patch('/tasks/{id}/complete', [TaskController::class, 'complete'])
+    ->name('tasks.complete');
+
+Route::patch('/tasks/{id}/undo', [TaskController::class, 'undo'])
+    ->name('tasks.undo');
+
+Route::resource('tasks', TaskController::class)
+    ->only(['index', 'store', 'edit', 'update']);
+
+Route::resource('tasks', TaskController::class)
+    ->only(['index', 'store', 'edit', 'update', 'destroy']);
+
+Route::get('/', function () {
+    return redirect()->route('tasks.index');
+});
